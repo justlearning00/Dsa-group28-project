@@ -1,48 +1,40 @@
-import java.util.List;
+import javax.swing.DefaultListModel;
 
 /**
- * The Sorter class provides sorting methods for contacts using simple sorting algorithms.
+ * The Sorter class provides methods to sort contacts based on different criteria.
  */
 public class Sorter {
-
-    /**
-     * Sorts the list of contacts by name using Bubble Sort algorithm.
-     *
-     * @param contacts The list of contacts to be sorted
-     */
-    public static void sortByName(List<Contact> contacts) {
-        int n = contacts.size(); // Get the number of contacts
-        // Bubble Sort algorithm
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                if (contacts.get(j).getName().compareToIgnoreCase(contacts.get(j + 1).getName()) > 0) {
-                    // Swap contacts if they are in the wrong order
-                    Contact temp = contacts.get(j);
-                    contacts.set(j, contacts.get(j + 1));
-                    contacts.set(j + 1, temp);
-                }
-            }
-        }
+    // Sort contacts by name using bubble sort
+    public void sortByName(DefaultListModel<Contact> model) {
+        bubbleSort(model, "name"); // Call bubble sort with "name" criteria
     }
 
-    /**
-     * Sorts the list of contacts by phone number using Bubble Sort algorithm.
-     *
-     * @param contacts The list of contacts to be sorted
-     */
-    public static void sortByPhone(List<Contact> contacts) {
-        int n = contacts.size(); // Get the number of contacts
-        // Bubble Sort algorithm
+    // Sort contacts by phone using bubble sort
+    public void sortByPhone(DefaultListModel<Contact> model) {
+        bubbleSort(model, "phone"); // Call bubble sort with "phone" criteria
+    }
+
+    // Bubble sort implementation for sorting contacts
+    private void bubbleSort(DefaultListModel<Contact> model, String criteria) {
+        int n = model.getSize(); // Get the size of the model
+        boolean swapped; // Flag to track if a swap occurred
+
         for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                if (contacts.get(j).getPhone().compareTo(contacts.get(j + 1).getPhone()) > 0) {
-                    // Swap contacts if they are in the wrong order
-                    Contact temp = contacts.get(j);
-                    contacts.set(j, contacts.get(j + 1));
-                    contacts.set(j + 1, temp);
+            swapped = false; // Reset the swap flag for each iteration
+            for (int j = 0; j < n - 1 - i; j++) {
+                Contact c1 = model.get(j); // Get the first contact
+                Contact c2 = model.get(j + 1); // Get the second contact
+                boolean condition = criteria.equals("name")
+                        ? c1.getName().compareToIgnoreCase(c2.getName()) > 0
+                        : c1.getPhone().compareTo(c2.getPhone()) > 0; // Determine if a swap is needed
+
+                if (condition) {
+                    model.set(j, c2); // Swap the contacts
+                    model.set(j + 1, c1); // Swap the contacts
+                    swapped = true; // Set the swap flag
                 }
             }
+            if (!swapped) break; // Exit if no swaps occurred
         }
     }
 }
-

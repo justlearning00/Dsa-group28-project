@@ -1,66 +1,51 @@
-import java.util.List; // Importing the List interface
+import javax.swing.DefaultListModel;
 
 /**
- * The ContactManager class handles the operations related to contacts.
+ * The ContactManager class is responsible for managing the contacts.
+ * It provides methods for adding, deleting, updating, and searching contacts.
  */
 public class ContactManager {
-    private ContactList contactList; // List to manage contacts
+    private DefaultListModel<Contact> contactListModel; // Model to hold contacts
 
-    public ContactManager() {
-        this.contactList = new ContactList(); // Initialize the ContactList
+    public ContactManager(DefaultListModel<Contact> contactListModel) {
+        this.contactListModel = contactListModel; // Initialize the contact list model
     }
 
-    /**
-     * Adds a contact to the manager.
-     *
-     * @param contact The contact to be added
-     */
-    public void addContact(Contact contact) {
-        contactList.add(contact);
+    // Add a new contact to the list
+    public void addContact(String name, String phone) {
+        // Check for duplicate contacts
+        for (int i = 0; i < contactListModel.getSize(); i++) {
+            if (contactListModel.get(i).getName().equalsIgnoreCase(name)) {
+                return; // Exit if a duplicate is found
+            }
+        }
+        contactListModel.addElement(new Contact(name, phone)); // Add the new contact
     }
 
-    /**
-     * Searches for a contact by name.
-     *
-     * @param name The name of the contact to search for
-     * @return The found contact, or null if not found
-     */
-    public Contact searchContact(String name) {
-        return contactList.find(name);
+    // Delete the specified contact
+    public void deleteContact(Contact contact) {
+        contactListModel.removeElement(contact); // Remove the contact from the model
     }
 
-    /**
-     * Deletes a contact by name.
-     *
-     * @param name The name of the contact to be deleted
-     */
-    public void deleteContact(String name) {
-        contactList.remove(name);
+    // Update the specified contact's details
+    public void updateContact(Contact contact, String newName, String newPhone) {
+        contact.setName(newName); // Update the name
+        contact.setPhone(newPhone); // Update the phone number
     }
 
-    /**
-     * Updates a contact's information.
-     *
-     * @param name       The name of the contact to update
-     * @param newContact The new contact information
-     */
-    public void updateContact(String name, Contact newContact) {
-        contactList.update(name, newContact);
-    }
+    // Search contacts using a linear search algorithm
+    public DefaultListModel<Contact> searchContacts(String searchTerm) {
+        DefaultListModel<Contact> filteredModel = new DefaultListModel<>(); // Create a new model for filtered contacts
 
-    /**
-     * Displays all contacts in the list.
-     */
-    public void displayContacts() {
-        contactList.getAllContacts().forEach(System.out::println);
-    }
-
-    /**
-     * Returns a list of all contacts.
-     *
-     * @return A list of all contacts
-     */
-    public List<Contact> getAllContacts() {
-        return contactList.getAllContacts();
+        // Perform a linear search for matching contacts
+        for (int i = 0; i < contactListModel.getSize(); i++) {
+            Contact contact = contactListModel.get(i); // Get contact
+            // Check if the name or phone contains the search term
+            if (contact.getName().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                    contact.getPhone().contains(searchTerm)) {
+                filteredModel.addElement(contact); // Add to filtered model if match found
+            }
+        }
+        return filteredModel; // Return the filtered contacts
     }
 }

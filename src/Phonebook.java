@@ -12,6 +12,8 @@ public class Phonebook extends JFrame {
     private JList<Contact> contactJList; // JList to display contacts
     private JTextField searchField; // Text field for search input
     private JButton addButton, updateButton, deleteButton, saveButton, sortByNameButton, sortByPhoneButton;
+    private ContactManager contactManager; // Instance of ContactManager
+    private Sorter sorter; // Instance of Sorter
 
     public Phonebook() {
         setTitle("Phonebook Application");
@@ -81,6 +83,10 @@ public class Phonebook extends JFrame {
         add(inputPanel, BorderLayout.NORTH);
         add(buttonPanel, BorderLayout.SOUTH);
 
+        // Initialize ContactManager and Sorter
+        contactManager = new ContactManager(contactListModel); // Pass model to ContactManager
+        sorter = new Sorter(); // Initialize Sorter
+
         // Set up button actions
         addButton.addActionListener(e -> addContact());
         updateButton.addActionListener(e -> updateContact());
@@ -114,9 +120,9 @@ public class Phonebook extends JFrame {
                     contactListModel.addElement(new Contact(parts[0], parts[1])); // Add contact
                 }
             }
-
+            JOptionPane.showMessageDialog(this, "Contacts loaded successfully."); // Success message
         } catch (FileNotFoundException e) {
-            showAlert("Error", "Contacts file not found.");
+            showAlert("Error", "Contacts file not found."); // Error message
         }
     }
 
@@ -127,9 +133,9 @@ public class Phonebook extends JFrame {
                 Contact contact = contactListModel.get(i);
                 writer.println(contact.getName() + "," + contact.getPhone()); // Write name and phone separated by a comma
             }
-            JOptionPane.showMessageDialog(this, "Contacts saved successfully.");
+            JOptionPane.showMessageDialog(this, "Contacts saved successfully."); // Success message
         } catch (FileNotFoundException e) {
-            showAlert("Error", "Unable to save contacts.");
+            showAlert("Error", "Unable to save contacts."); // Error message
         }
     }
 
@@ -138,20 +144,7 @@ public class Phonebook extends JFrame {
         if (name != null && !name.trim().isEmpty()) { // Check for valid input
             String phone = JOptionPane.showInputDialog(this, "Enter contact phone:"); // Prompt for phone
             if (phone != null && !phone.trim().isEmpty()) { // Check for valid input
-                // Linear search to check for duplicates
-                boolean isDuplicate = false;
-                for (int i = 0; i < contactListModel.getSize(); i++) {
-                    if (contactListModel.get(i).getName().equalsIgnoreCase(name)) {
-                        isDuplicate = true; // Set duplicate flag
-                        break;
-                    }
-                }
-                if (!isDuplicate) {
-                    contactListModel.addElement(new Contact(name, phone)); // Add contact
-                    JOptionPane.showMessageDialog(this, "Contact added successfully."); // Success message
-                } else {
-                    showAlert("Duplicate Contact", "A contact with this name already exists."); // Show alert for duplicates
-                }
+                contactManager.addContact(name, phone); // Add contact using ContactManager
             } else {
                 showAlert("Invalid Input", "Phone cannot be empty."); // Show alert for empty phone
             }
@@ -165,8 +158,7 @@ public class Phonebook extends JFrame {
         if (selectedContact != null) {
             int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this contact?", "Delete Contact", JOptionPane.YES_NO_OPTION);
             if (confirmation == JOptionPane.YES_OPTION) {
-                contactListModel.removeElement(selectedContact); // Remove contact
-                JOptionPane.showMessageDialog(this, "Contact deleted successfully."); // Success message
+                contactManager.deleteContact(selectedContact); // Remove contact using ContactManager
             }
         }
     }
@@ -177,10 +169,8 @@ public class Phonebook extends JFrame {
             String newName = JOptionPane.showInputDialog(this, "Update Name:", selectedContact.getName()); // Prompt for new name
             String newPhone = JOptionPane.showInputDialog(this, "Update Phone:", selectedContact.getPhone()); // Prompt for new phone
             if (newName != null && !newName.trim().isEmpty() && newPhone != null && !newPhone.trim().isEmpty()) {
-                selectedContact.setName(newName); // Update name
-                selectedContact.setPhone(newPhone); // Update phone
+                contactManager.updateContact(selectedContact, newName, newPhone); // Update contact using ContactManager
                 contactJList.repaint(); // Refresh the JList
-                JOptionPane.showMessageDialog(this, "Contact updated successfully."); // Success message
             } else {
                 showAlert("Invalid Input", "Name and Phone cannot be empty."); // Show alert for invalid input
             }
@@ -188,58 +178,29 @@ public class Phonebook extends JFrame {
     }
 
     private void searchContacts() {
-        String searchTerm = searchField.getText().toLowerCase(); // Get search term
-        DefaultListModel<Contact> filteredModel = new DefaultListModel<>(); // Create a new model for filtered contacts
-        // Linear search for matching contacts
-        for (int i = 0; i < contactListModel.getSize(); i++) {
-            Contact contact = contactListModel.get(i); // Get contact
-            // Check if name or phone contains the search term
-            if (contact.getName().toLowerCase().contains(searchTerm) || contact.getPhone().contains(searchTerm)) {
-                filteredModel.addElement(contact); // Add to filtered model
-            }
-        }
-        // Update the JList with the filtered contacts
-        contactJList.setModel(filteredModel); // Set the filtered model to the JList
+        String searchTerm = searchField.getText(); // Get search term
+        DefaultListModel<Contact> filteredModel = contactManager.searchContacts(searchTerm); // Use ContactManager to search
+        contactJList.setModel(filteredModel); // Update the JList with the filtered contacts
     }
 
     private void sortContactsByName() {
-        bubbleSort(contactListModel, "name"); // Sort by name using bubble sort
+        sorter.sortByName(contactListModel); // Use Sorter to sort by name
         contactJList.repaint(); // Refresh the JList
-        JOptionPane.showMessageDialog(this, "Contacts sorted by name successfully."); // Success message
     }
 
     private void sortContactsByPhone() {
-        bubbleSort(contactListModel, "phone"); // Sort by phone using bubble sort
+        sorter.sortByPhone(contactListModel); // Use Sorter to sort by phone
         contactJList.repaint(); // Refresh the JList
-        JOptionPane.showMessageDialog(this, "Contacts sorted by phone successfully."); // Success message
-    }
-
-    private void bubbleSort(DefaultListModel<Contact> model, String sortBy) {
-        // Bubble sort implementation
-        int n = model.getSize(); // Get size of the model
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                Contact contact1 = model.get(j); // Get first contact
-                Contact contact2 = model.get(j + 1); // Get second contact
-                // Compare based on the specified sort criterion
-                boolean shouldSwap = (sortBy.equals("name")) ? contact1.getName().compareToIgnoreCase(contact2.getName()) > 0 : contact1.getPhone().compareTo(contact2.getPhone()) > 0;
-                if (shouldSwap) {
-                    model.set(j, contact2); // Swap contacts
-                    model.set(j + 1, contact1); // Swap contacts
-                }
-            }
-        }
     }
 
     private void showAlert(String title, String message) {
-        // Show a message dialog
-        JOptionPane.showMessageDialog(this, message, title, JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE); // Show alert dialog
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Phonebook phonebook = new Phonebook(); // Create a new instance of Phonebook
-            phonebook.setVisible(true); // Make the frame visible
+            Phonebook phonebook = new Phonebook(); // Create an instance of Phonebook
+            phonebook.setVisible(true); // Set the frame visible
         });
     }
 }
