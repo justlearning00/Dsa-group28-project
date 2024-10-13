@@ -159,6 +159,7 @@ public class Phonebook extends JFrame {
             int confirmation = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this contact?", "Delete Contact", JOptionPane.YES_NO_OPTION);
             if (confirmation == JOptionPane.YES_OPTION) {
                 contactManager.deleteContact(selectedContact); // Remove contact using ContactManager
+                JOptionPane.showMessageDialog(this, "Contact deleted successfully."); // Success message
             }
         }
     }
@@ -171,6 +172,7 @@ public class Phonebook extends JFrame {
             if (newName != null && !newName.trim().isEmpty() && newPhone != null && !newPhone.trim().isEmpty()) {
                 contactManager.updateContact(selectedContact, newName, newPhone); // Update contact using ContactManager
                 contactJList.repaint(); // Refresh the JList
+                 JOptionPane.showMessageDialog(this, "Contact updated successfully."); // Success message
             } else {
                 showAlert("Invalid Input", "Name and Phone cannot be empty."); // Show alert for invalid input
             }
