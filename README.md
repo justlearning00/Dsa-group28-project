@@ -24,60 +24,57 @@ Features:
 
 Modules And Functions Descriptions
 
-1. Contact Class
-- Purpose: Represents a single contact in the phonebook.
-- Attributes:
-  - name: The name of the contact.
-  - phone: The phone number of the contact.
-- Functions:
-  - Constructor: Initializes a new Contact object with a name and phone number.
-  - Getters and Setters: Methods to access and modify the contact's name and phone number.
-  - toString(): Returns a string representation of the contact in the format "name - phone".
+1. ContactManager Class
 
+Purpose: Manages the core contact operations such as adding, deleting, updating, and searching contacts.
 
- 3.ContactManager Class
-- Purpose: Acts as a mediator between the Phonebook GUI and the ContactList, managing contact operations.
-- Attribute:
-  - contactList: An instance of ContactList that holds the contacts.
-- Functions:
-  - addContact(Contact contact): Adds a contact to the contact list.
-  - searchContact(String name): Searches for a contact by name.
-  - deleteContact(String name): Deletes a contact by name.
-  - updateContact(String name, Contact newContact): Updates a contact's information.
-  - displayContacts(): Displays all contacts in the list.
-  - getAllContacts(): Returns a list of all contacts.
+Functions:
+- addContact(String name, String phone): Adds a new contact if it doesn't already exist.
+- deleteContact(Contact contact): Removes a contact from the list.
+- updateContact(Contact contact, String newName, String newPhone): Updates the details of an existing contact.
+- searchContacts(String searchTerm): Searches the contact list for entries matching the search term.
 
-4. Phonebook Class (GUI)
-- Purpose: Provides a graphical user interface for managing contacts. Handles user interactions and displays the contact list.
-- Attributes:
-  - contactListModel: A model for the JList that displays contacts.
-  - contactJList: A JList component to show the list of contacts.
-  - searchField: A text field for user input to search contacts.
-  - addButton, updateButton, deleteButton, saveButton, sortByNameButton, sortByPhoneButton: Buttons for performing various operations.
-- Functions:
-  - Constructor: Initializes the GUI components and sets up action listeners.
-  - loadContacts(): Loads contacts from a file when the application starts.
-  - saveContacts(): Saves the current list of contacts to a file.
-  - addContact(): Handles adding a new contact through user input.
-  - deleteContact(): Handles deletion of the selected contact.
-  - updateContact(): Handles updating the selected contact's information.
-  - searchContacts(): Filters contacts in the list based on the search input using a linear search algorithm.
-  - sortContactsByName(): Sorts contacts by name and refreshes the display.
-  - sortContactsByPhone(): Sorts contacts by phone number and refreshes the display.
-  - bubbleSort(DefaultListModel<Contact> model, String sortBy): Implements the bubble sort algorithm for sorting contacts.
-  - showAlert(String title, String message): Displays alert messages to the user.
-  - main(String[] args): The entry point for the application, creating and displaying the Phonebook GUI.
+2. Sorter Class
 
- 5. Sorter Module
-- Purpose: Provides sorting functionality for the list of contacts, allowing users to organize contacts either by name or phone number.
-- Functions:
-  - sortByName(ContactList contactList): Sorts the contacts in the given ContactList by the contact names. This is implemented using a bubble sort  algorithm.
-  - sortByPhone(ContactList contactList): Sorts the contacts in the given ContactList by phone numbers, using a sbubble sort algorithm.
-  
- -Integration with Other Modules
-  - The Phonebook class would call the sorting methods from this module when the user selects the option to sort contacts.
-  - The ContactList would provide access to its contacts, allowing the sorter to manipulate the list as needed.
+Purpose: Handles the sorting of contacts based on either name or phone number.
 
+Functions:
+- sortByName(DefaultListModel<Contact> contactListModel): Sorts the contacts alphabetically by name.
+- sortByPhone(DefaultListModel<Contact> contactListModel): Sorts the contacts numerically by phone number.
+
+3. Contact Class
+
+Purpose: Represents a single contact with its name and phone number.
+
+Attributes:
+- String name: The contact's name.
+- String phone: The contact's phone number.
+
+Functions:
+- getName(): Returns the contact's name.
+- setName(String name): Sets the contact's name.
+- getPhone(): Returns the contact's phone number.
+- setPhone(String phone): Sets the contact's phone number.
+
+4. Phonebook Class
+
+Purpose: The main graphical user interface (GUI) for the application, which enables users to interact with contacts.
+
+Functions:
+- loadContacts(): Loads contacts from a text file when the application starts.
+- saveContacts(): Saves the current contacts to a text file.
+- addContact(): Prompts the user to add a new contact.
+- deleteContact(): Allows the user to delete a selected contact.
+- updateContact(): Enables the user to update an existing contact's details.
+- searchContacts(): Filters the displayed contacts based on a search term.
+- sortContactsByName(): Sorts the contacts by name using the Sorter class.
+- sortContactsByPhone(): Sorts the contacts by phone number using the Sorter class.
+- showAlert(String title, String message): Displays error or alert messages to the user.
+
+GUI Components:
+- Buttons (addButton, updateButton, deleteButton, etc.) for contact operations.
+- JList for displaying the list of contacts.
+- JTextField for search functionality.
 
 
 Usage
@@ -97,8 +94,7 @@ Usage
 Dsa/
 ├src/
 │               Contact.java
-│               Phonebook.java
-│                ContactList.java
+│               Phonebook.java           
 │		              	ContactManager.java
 │				             Sorter.java
 │	
